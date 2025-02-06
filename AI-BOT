@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Trading Bot for Pocket Option</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #28a745;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e9ecef;
+      border-radius: 4px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Trading Bot</h1>
+    <form id="bot-settings">
+      <label for="asset">Select Asset:</label>
+      <select id="asset" name="asset">
+        <option value="BTCUSD">BTC/USD</option>
+        <option value="EURUSD">EUR/USD</option>
+        <option value="GBPUSD">GBP/USD</option>
+        <option value="ETHUSD">ETH/USD</option>
+      </select>
+
+      <label for="amount">Trade Amount ($):</label>
+      <input type="number" id="amount" name="amount" min="1" value="10" required>
+
+      <label for="strategy">Trading Strategy:</label>
+      <select id="strategy" name="strategy">
+        <option value="trend">Trend Following</option>
+        <option value="mean-reversion">Mean Reversion</option>
+        <option value="sentiment">Sentiment Analysis</option>
+      </select>
+
+      <button type="submit">Start Trading</button>
+    </form>
+
+    <div class="status">
+      <h3>Bot Status:</h3>
+      <p id="status-message">Not running</p>
+      <h3>Trade Logs:</h3>
+      <ul id="trade-logs"></ul>
+    </div>
+  </div>
+
+  <script>
+    // JavaScript for interacting with the backend
+    const form = document.getElementById('bot-settings');
+    const statusMessage = document.getElementById('status-message');
+    const tradeLogs = document.getElementById('trade-logs');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const asset = document.getElementById('asset').value;
+      const amount = document.getElementById('amount').value;
+      const strategy = document.getElementById('strategy').value;
+
+      // Simulate sending data to the backend
+      statusMessage.textContent = 'Starting bot...';
+      const response = await fetch('/start-bot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ asset, amount, strategy }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        statusMessage.textContent = 'Bot is running';
+        updateTradeLogs(result.trades);
+      } else {
+        statusMessage.textContent = 'Failed to start bot';
+      }
+    });
+
+    // Function to update trade logs
+    function updateTradeLogs(trades) {
+      tradeLogs.innerHTML = ''; // Clear previous logs
+      trades.forEach(trade => {
+        const li = document.createElement('li');
+        li.textContent = `Trade: ${trade.asset} | Amount: $${trade.amount} | Result: ${trade.result}`;
+        tradeLogs.appendChild(li);
+      });
+    }
+
+    // Simulate receiving real-time updates from the backend
+    setInterval(async () => {
+      const response = await fetch('/get-trades');
+      const result = await response.json();
+      updateTradeLogs(result.trades);
+    }, 5000); // Fetch updates every 5 seconds
+  </script>
+</body>
+</html>
